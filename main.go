@@ -2,43 +2,39 @@ package main
 
 import (
 	"context"
-	"flag"
-	"fmt"
-	"log"
-
 	"github.com/farshidboroomand/hotel_reservation/api"
-	"github.com/farshidboroomand/hotel_reservation/types"
+	"github.com/farshidboroomand/hotel_reservation/db"
+	"github.com/joho/godotenv"
+	"log"
+	"os"
+
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const dbUri = "mongodb://localhost:27017"
-const dbName = "hotel_reservation"
-const collectionName = "users"
-
 func main() {
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(dbUri))
-	collection := client.Database(dbName).Collection(collectionName)
-	ctx := context.Background()
-	user := types.User{
-		FirstName: "farshid",
-		LastName:  "borooamnd",
-	}
-
-	res, err := collection.InsertOne(ctx, user)
+	mongoEndpoint := os.Getenv("MONGO_DB_URL")
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(mongoEndpoint))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println(res)
+	var (
+		app         = fiber.New()
+		apiV1       = app.Group("/api/v1")
+		userStore   = db.NewMongoUserStore(client)
+		userHandler = api.NewUserHandler(userStore)
+	)
 
-	listenAddr := flag.String("listenAddr", ":5000", "The Listen Address Of Api Server")
-	flag.Parse()
+	apiV1.Get("/users/:id", userHandler.HandleGetUser)
 
-	app := fiber.New()
-	apiV1 := app.Group("/api/v1")
+	listenAddr := os.Getenv("HTTP_LISTEN_ADDRESS")
+	app.Listen(listenAddr)
+}
 
-	apiV1.Get("/user", api.HandleGetUser)
-	app.Listen(*listenAddr)
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Fatal(err)
+	}
 }
