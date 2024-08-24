@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
+	"log"
+	"os"
+
 	"github.com/farshidboroomand/hotel_reservation/api"
 	"github.com/farshidboroomand/hotel_reservation/db"
 	"github.com/joho/godotenv"
-	"log"
-	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -28,6 +29,8 @@ func main() {
 	)
 
 	apiV1.Get("/users/:id", userHandler.HandleGetUser)
+	apiV1.Get("/users", userHandler.HandleGetUsers)
+	apiV1.Post("/users", userHandler.HandleCreateNewUser)
 
 	listenAddr := os.Getenv("HTTP_LISTEN_ADDRESS")
 	app.Listen(listenAddr)
