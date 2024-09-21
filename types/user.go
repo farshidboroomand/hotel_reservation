@@ -51,7 +51,7 @@ func (params CreateUserParams) Validate() map[string]string {
 	return errors
 }
 
-func CreateNewUserFromparams(params CreateUserParams) (*User, error) {
+func CreateNewUserFromParams(params CreateUserParams) (*User, error) {
 	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(params.Password), bcryptCost)
 
 	if err != nil {
