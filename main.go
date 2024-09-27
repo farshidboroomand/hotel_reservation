@@ -32,6 +32,7 @@ func main() {
 	apiV1.Get("/users", userHandler.HandleGetUsers)
 	apiV1.Post("/users", userHandler.HandleCreateNewUser)
 	apiV1.Delete("/users/:id", userHandler.HandleDeleteUser)
+	apiV1.Patch("/users/:id", userHandler.HandlePutUser)
 
 	listenAddr := os.Getenv("HTTP_LISTEN_ADDRESS")
 	app.Listen(listenAddr)
